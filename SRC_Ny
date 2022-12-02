@@ -1,0 +1,70 @@
+#Hovedvindueklassen, som alle objektorienterede applikationer skal stamme fra import
+import arcade
+import math
+
+BREDDE = 800
+HOEJDE = 600
+SPORLAENGDE = 200
+
+#I en klasse kan man gemme værdier og funktioner, som knytter sig særligt til klassen
+class Cirkel:
+    def __init__(self, centrum, radius, vinkelhastighed, vinkel, farve, sporlaengde=None):
+        self.centrum = centrum
+        self.radius = radius
+        self.vinkelhastighed = vinkelhastighed
+        self.vinkel = vinkel
+        self.punkt = centrum[0] + self.radius * math.cos(self.vinkel), centrum[1] + self.radius * math.sin(self.vinkel)
+        self.farve = farve
+        self.sporlaengde = sporlaengde
+        if self.sporlaengde:
+            self.spor = list()
+
+#float delta_time: Tidsinterval siden sidste gang funktionen blev kaldt.
+    def updater(self, delta_tid):
+        if self.sporlaengde:
+            self.spor.append(self.punkt)
+        if self.sporlaengde and len(self.spor) >= self.sporlaengde:
+            self.spor.pop(0)
+
+        self.vinkel += self.vinkelhastighed * delta_tid
+        self.punkt = self.centrum[0] + self.radius * math.cos(self.vinkel), self.centrum[1] + self.radius * math.sin(
+            self.vinkel)
+
+    def tegn(self):
+        x, y = self.punkt
+        arcade.draw_circle_filled(x, y, 4, self.farve)
+        for punkt in self.spor:
+            x, y = punkt
+            arcade.draw_circle_filled(x, y, 1, self.farve)
+
+
+class Vindue(arcade.Window):
+    def __init__(self, width, height, title):
+        super().__init__(width, height, title)
+        arcade.set_background_color(arcade.csscolor.BLACK)
+
+    def setup(self):
+        self.cirkel = Cirkel((400, 300), 100, 2, 0, arcade.csscolor.SKY_BLUE, 400)
+        self.cirkel2 = Cirkel((400, 300), 50, 1, 0, arcade.csscolor.GREEN, 400)
+
+ # float delta_time: Tidsinterval siden sidste gang funktionen blev kaldt i sekunder
+    def update(self, delta_tid):
+        self.cirkel.updater(delta_tid)
+        self.cirkel2.updater(delta_tid)
+
+#Tilsidesæt denne funktion for at tilføje din brugerdefinerede tegningskode
+    def on_draw(self):
+        self.clear()
+        self.cirkel.tegn()
+        self.cirkel2.tegn()
+
+
+def main():
+    vindue = Vindue(BREDDE, HOEJDE, "Cirkel som klasse")
+    vindue.setup()
+
+#for at kunne køre arcade uden den stopper.
+    arcade.run()
+
+# Kald hovedfunktionen for at starte programmet
+main()
